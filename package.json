@@ -1,0 +1,19 @@
+{
+  "name": "you-are-scraped-news",
+  "version": "1.0.0",
+  "description": "Web-scraping project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rsmith1412/YouAreScrapedNews.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rsmith1412/YouAreScrapedNews/issues"
+  },
+  "homepage": "https://github.com/rsmith1412/YouAreScrapedNews#readme"
+}
