@@ -5,7 +5,6 @@ var mongojs = require("mongojs");
 var request = require("request");
 var cheerio = require("cheerio");
 
-var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var handlebars = require("express-handlebars");
 
@@ -13,8 +12,14 @@ var handlebars = require("express-handlebars");
 // Initialize Express
 var app = express();
 
+//Set up Hnadlebars
+var exphbs = require("express-handlebars");
+
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
+
 // Database configuration
-var databaseUrl = "scraper";
+var databaseUrl = "youAreScrapedNews";
 var collections = ["scrapedData"];
 
 // Hook mongojs configuration to the db variable
@@ -24,9 +29,14 @@ db.on("error", function(error) {
 });
 
 
-// Main route (simple Hello World Message)
+// Main route for index.handlebars
 app.get("/", function(req, res) {
-  res.send("Hello world");
+  res.render("index");
+});
+
+//Route for saved articles page
+app.get("/saved", function(req, res) {
+  res.render("saved");
 });
 
 // Retrieve data from the db
@@ -47,7 +57,7 @@ app.get("/all", function(req, res) {
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
   // Make a request for the news section of ycombinator
-  request("https://news.ycombinator.com/", function(error, response, html) {
+  request("https://www.npr.org/sections/news/", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
     // For each element with a "title" class
