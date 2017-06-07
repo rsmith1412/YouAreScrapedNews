@@ -4,6 +4,7 @@ var mongojs = require("mongojs");
 // Require request and cheerio. This makes the scraping possible
 var request = require("request");
 var cheerio = require("cheerio");
+var mongoose = require("mongoose");
 
 var bodyParser = require("body-parser");
 var handlebars = require("express-handlebars");
@@ -17,17 +18,23 @@ var exphbs = require("express-handlebars");
 
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
+app.use(express.static("public"));
 
-// Database configuration
-var databaseUrl = "youAreScrapedNews";
-var collections = ["scrapedData"];
 
-// Hook mongojs configuration to the db variable
-var db = mongojs(databaseUrl, collections);
+var Article = require('./models/article.js');
+var Comment = require('./models/comments.js');
+
+// Database configuration with mongoose
+mongoose.connect("mongodb://localhost/youAreScrapedNews");
+var db = mongoose.connection;
+
 db.on("error", function(error) {
   console.log("Database Error:", error);
 });
 
+db.on("open", function(){
+  console.log("Connected to mongodb");
+});
 
 // Main route for index.handlebars
 app.get("/", function(req, res) {
@@ -42,7 +49,7 @@ app.get("/saved", function(req, res) {
 // Retrieve data from the db
 app.get("/all", function(req, res) {
   // Find all results from the scrapedData collection in the db
-  db.scrapedData.find({}, function(error, found) {
+  Article.find({}, function(error, found) {
     // Throw any errors to the console
     if (error) {
       console.log(error);
@@ -56,7 +63,7 @@ app.get("/all", function(req, res) {
 
 // Scrape data from one site and place it into the mongodb db
 app.get("/scrape", function(req, res) {
-  // Make a request for the news section of ycombinator
+  // Make a request for the news section of NPR
   request("https://www.npr.org/sections/news/", function(error, response, html) {
     // Load the html body from request into cheerio
     var $ = cheerio.load(html);
@@ -69,10 +76,14 @@ app.get("/scrape", function(req, res) {
 
       // If this title element had both a title and a link
       if (title && link) {
+        // Article.save(function(err, data){
+
+        // });
+        
         // Save the data in the scrapedData db
-        db.scrapedData.save({
+        Article.save({
           title: title,
-          link: link
+          link: link,
         },
         function(error, saved) {
           // If there's an error during this query
@@ -94,6 +105,11 @@ app.get("/scrape", function(req, res) {
   res.send("Scrape Complete");
 });
 
+var articleRoutes = require('./controllers/articles_controller')
+app.use('/articles', articleRoutes)
+//Connecting to mongoose (works with Heroku)
+// mongoose.connect('mongodb://heroku_1hq0pj0v:vl5jg9d1ci9f7ttdi4bqugsums@ds153400.mlab.com:53400/heroku_1hq0pj0v');
+// var db = mongoose.connection;
 
 // Listen on port 3000
 app.listen(3000, function() {

@@ -1,0 +1,1 @@
+var Comment = require("../models/Comment.js");
